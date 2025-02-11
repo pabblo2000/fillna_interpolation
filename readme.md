@@ -64,41 +64,24 @@ La interpolación se realiza de la siguiente manera:
   ![Interpolación Lineal](https://latex.codecogs.com/png.image?\dpi{110}\bg{white}$$v_i=L&plus;\left(\frac{(i-\text{start}&plus;1)}{(k&plus;1)}\right)\cdot(R-L)$$)
 
 - **Interpolación Exponencial:**
-
   ![Interpolación Exponencial](https://latex.codecogs.com/png.image?\dpi{110}\bg{white}$$v_i=L&plus;\left(\frac{\exp\left(\frac{i-\text{start}&plus;1}{k&plus;1}\right)-1}{e-1}\right)\cdot(R-L)$$)
 
 - **Interpolación Sigmoidal:**
 
   Sea 
-  $$
-  \text{frac} = \frac{i - \text{start} + 1}{k + 1}.
-  $$
+  ![Interpolacion Sigmoidal](https://latex.codecogs.com/png.image?\dpi{110}\bg{white}$$\text{frac}=\frac{i-\text{start}&plus;1}{k&plus;1}$$)
 
   Se define la función logística normalizada:
-
-  $$
-  S = \frac{1}{1 + e^{-k(\text{frac} - 0.5)}}, \quad
-  S_0 = \frac{1}{1 + e^{-k(0 - 0.5)}}, \quad
-  S_1 = \frac{1}{1 + e^{-k(1 - 0.5)}}
-  $$
+  ![Función logística normalizada](https://latex.codecogs.com/png.image?\dpi{110}\bg{white}$$S=\frac{1}{1&plus;e^{-k(\text{frac}-0.5)}},\quad S_0=\frac{1}{1&plus;e^{-k(0-0.5)}},\quad S_1=\frac{1}{1&plus;e^{-k(1-0.5)}}$$)
 
   y la fracción normalizada es:
-
-  $$
-  \text{norm\_frac} = \frac{S - S_0}{S_1 - S_0}.
-  $$
+  ![Fraccion normalizada](https://latex.codecogs.com/png.image?\dpi{110}\bg{white}$$\text{norm\_frac}=\frac{S-S_0}{S_1-S_0}$$)
 
   Entonces, la interpolación se realiza como:
-
-  $$
-  v_i = L + \text{norm\_frac} \cdot (R - L)
-  $$
+  ![Interpolación sig izq-der](https://latex.codecogs.com/png.image?\dpi{110}\bg{white}$$v_i=L&plus;\text{norm\_frac}\cdot(R-L)$$)
 
   para el caso de interpolación de izquierda a derecha, y de forma análoga para la interpolación de derecha a izquierda:
-
-  $$
-  v_i = R + \text{norm\_frac} \cdot (L - R).
-  $$
+  ![Interpolación sig der-izq](https://latex.codecogs.com/png.image?\dpi{110}\bg{white}$$v_i=R&plus;\text{norm\_frac}\cdot(L-R)$$)
 
 > **Nota:**  
 > - Si el bloque inicia en el primer índice (i.e. $\text{start} = 0$), la interpolación se realiza de **derecha a izquierda** (invirtiendo el orden de cálculo).  
@@ -108,36 +91,21 @@ La interpolación se realiza de la siguiente manera:
 > &nbsp;
 
 Para asegurar que el cambio entre valores consecutivos no supere $max\_step$, se ajusta cada valor $v_i$ de la siguiente forma:
-
-$$
-v_i = \max\!\left(\min\!\left(v_i,\, v_{i-1} + \text{max\_step}\right),\, v_{i-1} - \text{max\_step}\right)
-$$
+![Ajuste de valores](https://latex.codecogs.com/png.image?\dpi{110}\bg{white}
 
 Si se activa la restricción acumulativa ($cumm = \text{True}$), se garantiza que:
 
 - **Al rellenar de izquierda a derecha:**
-
-  $$
-  v_i \geq v_{i-1}
-  $$
+  ![Restricción acumulativa izq-der](https://latex.codecogs.com/png.image?\dpi{110}\bg{white}$$v_i \geq v_{i-1}$$)
 
 - **Al rellenar de derecha a izquierda:**
-
-  $$
-  v_i \leq v_{i+1}
-  $$
+  ![Restricción acumulativa der-izq](https://latex.codecogs.com/png.image?\dpi{110}\bg{white}$$v_i \leq v_{i+1}$$)
 
 Además, se añade ruido aleatorio:
-
-$$
-v_i = v_i + \text{random.uniform}(-\text{noise},\, \text{noise})
-$$
+![Ruido aleatorio](https://latex.codecogs.com/png.image?\dpi{110}\bg{white}
 
 Finalmente, se combina con la información de otras columnas mediante:
-
-$$
-v_{i,\text{final}} = (1 - \text{other\_weight}) \cdot v_i + \text{other\_weight} \cdot v_{i,\text{other}}
-$$
+![Combinación con otras columnas](https://latex.codecogs.com/png.image?\dpi{110}\bg{white}
 
 donde $v_{i,\text{other}}$ es la media de los valores de las columnas seleccionadas para esa fila (ignorando $NaN$).
 

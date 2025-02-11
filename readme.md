@@ -63,29 +63,27 @@ La interpolación se realiza de la siguiente manera:
 
 - **Interpolación Lineal:**
 
-  ![Interpolación Lineal](https://latex.codecogs.com/svg.image?$$v_i=L&plus;\left(\frac{(i-\text{start}&plus;1)}{(k&plus;1)}\right)\cdot(R-L)$$)
+  ![Interpolación Lineal](https://latex.codecogs.com/svg.image?\bg_white&space;v_i=L&plus;\left(\frac{(i-\text{start}&plus;1)}{(k&plus;1)}\right)\cdot(R-L))
 
-- **Interpolación Exponencial:**
+  - **Interpolación Exponencial:**
 
-  ![Interpolación Exponencial](https://latex.codecogs.com/svg.image?$$v_i=L&plus;\left(\frac{\exp\left(\frac{i-\text{start}&plus;1}{k&plus;1}\right)-1}{e-1}\right)\cdot(R-L)$$)
+    ![Interpolación Exponencial](https://latex.codecogs.com/svg.image?\bg_white&space;v_i=L&plus;\left(\frac{\exp\left(\frac{i-\text{start}&plus;1}{k&plus;1}\right)-1}{e-1}\right)\cdot(R-L))
 
-- **Interpolación Sigmoidal:**
+  - **Interpolación Sigmoidal:**
 
-  Sea
-  ![Interpolación Sigmoidal](https://latex.codecogs.com/svg.image?$$\text{frac}=\frac{i-\text{start}&plus;1}{k&plus;1}.$$)
-
-  Se define la función logística normalizada:
-  ![función logística normalizada](https://latex.codecogs.com/svg.image?$$S=\frac{1}{1&plus;e^{-k(\text{frac}-0.5)}},\quad&space;S_0=\frac{1}{1&plus;e^{-k(0-0.5)}},\quad&space;S_1=\frac{1}{1&plus;e^{-k(1-0.5)}}$$)
-  y la fracción normalizada es:
-  ![fracción normalizada](https://latex.codecogs.com/svg.image?$$\text{norm\_frac}=\frac{S-S_0}{S_1-S_0}.$$)
-
-
-  Entonces, la interpolación se realiza como:
-  ![interpolación de izquierda a derecha](https://latex.codecogs.com/svg.image?$$v_i=L&plus;\text{norm\_frac}\cdot(R-L)$$)
-
-
-  para el caso de interpolación de izquierda a derecha, y de forma análoga para la interpolación de derecha a izquierda:
-  ![interpolación de derecha a izquierda](https://latex.codecogs.com/svg.image?$$v_i=R&plus;\text{norm\_frac}\cdot(L-R).$$)
+    Sea
+    ![Interpolación Sigmoidal](https://latex.codecogs.com/svg.image?\bg_white&space;\text{frac}=\frac{i-\text{start}&plus;1}{k&plus;1}.)
+    
+    Se define la función logística normalizada:
+    ![función logística normalizada](https://latex.codecogs.com/svg.image?\bg_white&space;S=\frac{1}{1&plus;e^{-k(\text{frac}-0.5)}},\quad&space;S_0=\frac{1}{1&plus;e^{-k(0-0.5)}},\quad&space;S_1=\frac{1}{1&plus;e^{-k(1-0.5)}})
+    y la fracción normalizada es:
+    ![fracción normalizada](https://latex.codecogs.com/svg.image?\bg_white&space;\text{norm\_frac}=\frac{S-S_0}{S_1-S_0}.)
+    
+    Entonces, la interpolación se realiza como:
+    ![interpolación de izquierda a derecha](https://latex.codecogs.com/svg.image?\bg_white&space;v_i=L&plus;\text{norm\_frac}\cdot(R-L))
+    
+    para el caso de interpolación de izquierda a derecha, y de forma análoga para la interpolación de derecha a izquierda:
+    ![interpolación de derecha a izquierda](https://latex.codecogs.com/svg.image?\bg_white&space;v_i=R&plus;\text{norm\_frac}\cdot(L-R).)
 
 
 > **Nota:**  
@@ -93,31 +91,30 @@ La interpolación se realiza de la siguiente manera:
 > - En este caso, la restricción acumulativa se aplica de forma inversa: se garantiza que cada nuevo valor no sea mayor que el valor a su derecha.
 > - En la interpolación sigmoidal, la constante $k$ controla la pendiente de la función logística y se ha fijado en 10 en la implementación.
 > <br>
-> &nbsp;
+
 
 Para asegurar que el cambio entre valores consecutivos no supere $max\_step$, se ajusta cada valor $v_i$ de la siguiente forma:
 
-[!Image](https://latex.codecogs.com/svg.image?$$v_i=\max\!\left(\min\!\left(v_i,\,v_{i-1}&plus;\text{max\_step}\right),\,v_{i-1}-\text{max\_step}\right)$$)
+![Image](https://latex.codecogs.com/svg.image?$$v_i=\max\!\left(\min\!\left(v_i,\,v_{i-1}&plus;\text{max\_step}\right),\,v_{i-1}-\text{max\_step}\right)$$)
 
 Si se activa la restricción acumulativa ($cumm = \text{True}$), se garantiza que:
 
 - **Al rellenar de izquierda a derecha:**
 
-  [!izq_der](https://latex.codecogs.com/svg.image?$$v_i\geq&space;v_{i-1}$$)
+  ![izq_der](https://latex.codecogs.com/svg.image?\bg_white&space;v_i\geq&space;v_{i-1})
 
 - **Al rellenar de derecha a izquierda:**
 
   
-  [!der_izq](https://latex.codecogs.com/svg.image?$$v_i\leq&space;v_{i&plus;1}$$)
+   ![der_izq](https://latex.codecogs.com/svg.image?\bg_white&space;v_i\leq&space;v_{i&plus;1})
 
-Además, se añade ruido aleatorio:
+  Además, se añade ruido aleatorio:
 
-  [!noise](https://latex.codecogs.com/svg.image?$$v_i=v_i&plus;\text{random.uniform}(-\text{noise},\,\text{noise})$$)
+    ![noise](https://latex.codecogs.com/svg.image?\bg_white&space;v_i=v_i&plus;\text{random.uniform}(-\text{noise},\,\text{noise}))
 
-Finalmente, se combina con la información de otras columnas mediante:
+  Finalmente, se combina con la información de otras columnas mediante:
 
-
-[!combination](https://latex.codecogs.com/svg.image?$$v_{i,\text{final}}=(1-\text{other\_weight})\cdot&space;v_i&plus;\text{other\_weight}\cdot&space;v_{i,\text{other}}$$)
+  ![combination](https://latex.codecogs.com/svg.image?\bg_white&space;v_{i,\text{final}}=(1-\text{other\_weight})\cdot&space;v_i&plus;\text{other\_weight}\cdot&space;v_{i,\text{other}})
 
 donde $v_{i,\text{other}}$ es la media de los valores de las columnas seleccionadas para esa fila (ignorando $NaN$).
 
@@ -195,7 +192,7 @@ df_sigmoidal = interpolate_with_rules_v3(
 > - Tambien puedes probar la función usando la función test_interpolate()
 > - Para ello, ejecuta el siguiente código:
 > <br>
-> &nbsp;
+
 
 ```python
 

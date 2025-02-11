@@ -67,12 +67,10 @@ La interpolación se realiza de la siguiente manera:
   ![Interpolación Exponencial](https://latex.codecogs.com/png.image?\dpi{110}\bg{white}$$v_i=L&plus;\left(\frac{\exp\left(\frac{i-\text{start}&plus;1}{k&plus;1}\right)-1}{e-1}\right)\cdot(R-L)$$)
 
 - **Interpolación Sigmoidal:**
-
-  Sea 
   ![Interpolacion Sigmoidal](https://latex.codecogs.com/png.image?\dpi{110}\bg{white}$$\text{frac}=\frac{i-\text{start}&plus;1}{k&plus;1}$$)
 
   Se define la función logística normalizada:
-  ![Función logística normalizada](https://latex.codecogs.com/png.image?\dpi{110}\bg{white}$$S=\frac{1}{1&plus;e^{-k(\text{frac}-0.5)}},\quad S_0=\frac{1}{1&plus;e^{-k(0-0.5)}},\quad S_1=\frac{1}{1&plus;e^{-k(1-0.5)}}$$)
+  ![Función_logística_normalizada](https://latex.codecogs.com/png.image?\dpi{110}\bg{white}$$S=\frac{1}{1&plus;e^{-k(\text{frac}-0.5)}},\quad S_0=\frac{1}{1&plus;e^{-k(0-0.5)}},\quad S_1=\frac{1}{1&plus;e^{-k(1-0.5)}}$$)
 
   y la fracción normalizada es:
   ![Fraccion normalizada](https://latex.codecogs.com/png.image?\dpi{110}\bg{white}$$\text{norm\_frac}=\frac{S-S_0}{S_1-S_0}$$)
@@ -91,21 +89,21 @@ La interpolación se realiza de la siguiente manera:
 > &nbsp;
 
 Para asegurar que el cambio entre valores consecutivos no supere $max\_step$, se ajusta cada valor $v_i$ de la siguiente forma:
-![Ajuste de valores](https://latex.codecogs.com/png.image?\dpi{110}\bg{white}
+![Ajuste_de_valores](https://latex.codecogs.com/png.image?\dpi{110}\bg{white}
 
 Si se activa la restricción acumulativa ($cumm = \text{True}$), se garantiza que:
 
 - **Al rellenar de izquierda a derecha:**
-  ![Restricción acumulativa izq-der](https://latex.codecogs.com/png.image?\dpi{110}\bg{white}$$v_i \geq v_{i-1}$$)
+  ![Restricción_acumulativa_izq-der](https://latex.codecogs.com/png.image?\dpi{110}\bg{white}$$v_i \geq v_{i-1}$$)
 
 - **Al rellenar de derecha a izquierda:**
-  ![Restricción acumulativa der-izq](https://latex.codecogs.com/png.image?\dpi{110}\bg{white}$$v_i \leq v_{i+1}$$)
+  ![Restricción_acumulativa_der-izq](https://latex.codecogs.com/png.image?\dpi{110}\bg{white}$$v_i \leq v_{i+1}$$)
 
 Además, se añade ruido aleatorio:
-![Ruido aleatorio](https://latex.codecogs.com/png.image?\dpi{110}\bg{white}
+![Ruido_aleatorio](https://latex.codecogs.com/png.image?\dpi{110}\bg{white}
 
 Finalmente, se combina con la información de otras columnas mediante:
-![Combinación con otras columnas](https://latex.codecogs.com/png.image?\dpi{110}\bg{white}
+![Combinación_con_otras_columnas](https://latex.codecogs.com/png.image?\dpi{110}\bg{white}
 
 donde $v_{i,\text{other}}$ es la media de los valores de las columnas seleccionadas para esa fila (ignorando $NaN$).
 

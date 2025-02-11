@@ -39,9 +39,7 @@ Las reglas principales son:
    - Se calcula la media de las columnas adicionales (ignorando $NaN$) para cada fila en la que se interpola.  
    - El valor final se obtiene combinando el valor interpolado y la media de las otras columnas según la fórmula:
 
-     $$
-     v_{i,\text{final}} = (1 - \text{other\_weight}) \cdot v_{i,\text{interp}} + \text{other\_weight} \cdot v_{i,\text{other}}
-     $$
+     ![Combinación con Otras Columnas](https://latex.codecogs.com/png.image?\inline&space;\dpi{110}\bg{white}$$v_{i,\text{final}}=(1-\text{other\_weight})\cdot&space;v_{i,\text{interp}}&plus;\text{other\_weight}\cdot&space;v_{i,\text{other}}$$)
 
      donde:
      - $v_{i,\text{interp}}$ es el valor obtenido por la interpolación (lineal, exponencial o sigmoidal).
@@ -73,13 +71,13 @@ La interpolación se realiza de la siguiente manera:
   ![Función_logística_normalizada](https://latex.codecogs.com/png.image?\inline&space;\dpi{110}\bg{white}$$S=\frac{1}{1&plus;e^{-k(\text{frac}-0.5)}},\quad&space;S_0=\frac{1}{1&plus;e^{-k(0-0.5)}},\quad&space;S_1=\frac{1}{1&plus;e^{-k(1-0.5)}}$$)
 
   y la fracción normalizada es:
-  ![Fraccion normalizada](https://latex.codecogs.com/png.image?\inline&space;\dpi{110}\bg{white}$$\text{norm\_frac}=\frac{S-S_0}{S_1-S_0}.$$)
+  ![Fraccion normalizada](https://latex.codecogs.com/png.image?\inline&space;\dpi{110}\bg{white}$$\text{norm\_frac}=\frac{S-S_0}{S_1-S_0}$$)
 
   Entonces, la interpolación se realiza como:
   ![Interpolación sig izq-der](https://latex.codecogs.com/png.image?\inline&space;\dpi{110}\bg{white}$$v_i=L&plus;\text{norm\_frac}\cdot(R-L)$$)
 
   para el caso de interpolación de izquierda a derecha, y de forma análoga para la interpolación de derecha a izquierda:
-  ![Interpolación sig der-izq](https://latex.codecogs.com/png.image?\inline&space;\dpi{110}\bg{white}$$v_i=R&plus;\text{norm\_frac}\cdot(L-R).$$)
+  ![Interpolación sig der-izq](https://latex.codecogs.com/png.image?\inline&space;\dpi{110}\bg{white}$$v_i=R&plus;\text{norm\_frac}\cdot(L-R)$$)
 
 > **Nota:**  
 > - Si el bloque inicia en el primer índice (i.e. $\text{start} = 0$), la interpolación se realiza de **derecha a izquierda** (invirtiendo el orden de cálculo).  

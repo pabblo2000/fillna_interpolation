@@ -178,7 +178,6 @@ df_sigmoidal = interpolate_with_rules_v3(
 > - Tambien puedes probar la función usando la función test_interpolate()
 > - Para ello, ejecuta el siguiente código:
 > <br>
-> &nbsp;
 
 ```python
 

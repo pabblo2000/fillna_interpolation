@@ -61,15 +61,11 @@ Para un bloque de $k$ valores $NaN$, con los siguientes valores de frontera:
 La interpolación se realiza de la siguiente manera:
 
 - **Interpolación Lineal:**
-  ![Interpolación Lineal](https://latex.codecogs.com/svg.image?\bg{white}$$v_i=L&plus;\left(\frac{(i-\text{start}&plus;1)}{(k&plus;1)}\right)\cdot(R-L)$$)
-
-
+  ![Interpolación Lineal](https://latex.codecogs.com/png.image?\dpi{110}\bg{white}$$v_i=L&plus;\left(\frac{(i-\text{start}&plus;1)}{(k&plus;1)}\right)\cdot(R-L)$$)
 
 - **Interpolación Exponencial:**
 
-  $$
-  v_i = L + \left(\frac{\exp\left(\frac{i - \text{start} + 1}{k + 1}\right) - 1}{e - 1}\right) \cdot (R - L)
-  $$
+  ![Interpolación Exponencial](https://latex.codecogs.com/png.image?\dpi{110}\bg{white}$$v_i=L&plus;\left(\frac{\exp\left(\frac{i-\text{start}&plus;1}{k&plus;1}\right)-1}{e-1}\right)\cdot(R-L)$$)
 
 - **Interpolación Sigmoidal:**
 

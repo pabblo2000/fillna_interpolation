@@ -39,8 +39,14 @@ Las reglas principales son:
    - Se calcula la media de las columnas adicionales (ignorando $NaN$) para cada fila en la que se interpola.  
    - El valor final se obtiene combinando el valor interpolado y la media de las otras columnas según la fórmula:
 
-     ![Combinación con Otras Columnas](https://latex.codecogs.com/png.image?\inline&space;\dpi{110}\bg{white}$$v_{i,\text{final}}=(1-\text{other\_weight})\cdot&space;v_{i,\text{interp}}&plus;\text{other\_weight}\cdot&space;v_{i,\text{other}}$$)
-
+    <p align="center">
+      <img src="img\Combinacion_columnas.png" alt="Combinación con Otras Columnas">
+    </p>
+     <!--
+     $$
+     v_{i,\text{final}} = (1 - \text{other\_weight}) \cdot v_{i,\text{interp}} + \text{other\_weight} \cdot v_{i,\text{other}}
+     $$
+    -->
      donde:
      - $v_{i,\text{interp}}$ es el valor obtenido por la interpolación (lineal, exponencial o sigmoidal).
      - $v_{i,\text{other}}$ es la media de los valores en las columnas adicionales para la fila $i$.
@@ -50,6 +56,7 @@ Las reglas principales son:
 
 ---
 
+
 ## 📌 Fórmulas de Interpolación
 
 Para un bloque de $k$ valores $NaN$, con los siguientes valores de frontera:
@@ -58,27 +65,54 @@ Para un bloque de $k$ valores $NaN$, con los siguientes valores de frontera:
 
 La interpolación se realiza de la siguiente manera:
 
-- **Interpolación Lineal:**
-  ![Interpolación Lineal](https://latex.codecogs.com/png.image?\dpi{110}\bg{white}$$v_i=L&plus;\left(\frac{(i-\text{start}&plus;1)}{(k&plus;1)}\right)\cdot(R-L)$$)
+- **Interpolación Lineal:** <img src="https://latex.codecogs.com/png.latex?\dpi{110}\bg{white}v_i=L+\left(\frac{(i-\text{start}+1)}{(k+1)}\right)\cdot(R-L)" style="vertical-align: middle;" alt="Interpolación Lineal">
+  <!--
+  $$
+  v_i = L + \left(\frac{(i - \text{start} + 1)}{(k + 1)}\right) \cdot (R - L)
+  $$
+  -->
 
-- **Interpolación Exponencial:**
-  ![Interpolación Exponencial](https://latex.codecogs.com/png.image?\dpi{110}\bg{white}$$v_i=L&plus;\left(\frac{\exp\left(\frac{i-\text{start}&plus;1}{k&plus;1}\right)-1}{e-1}\right)\cdot(R-L)$$)
+- **Interpolación Exponencial:** <img src="https://latex.codecogs.com/png.image?\dpi{110}\bg{white}$$v_i=L&plus;\left(\frac{\exp\left(\frac{i-\text{start}&plus;1}{k&plus;1}\right)-1}{e-1}\right)\cdot(R-L)$$" style="vertical-align: middle;" alt="Interpolación Lineal">
+  <!--
+  $$
+  v_i = L + \left(\frac{\exp\left(\frac{i - \text{start} + 1}{k + 1}\right) - 1}{e - 1}\right) \cdot (R - L)
+  $$
+  -->
 
-- **Interpolación Sigmoidal:**
-  ![Interpolacion Sigmoidal](https://latex.codecogs.com/png.image?\dpi{110}\bg{white}$$\text{frac}=\frac{i-\text{start}&plus;1}{k&plus;1}$$)
+- **Interpolación Sigmoidal:** <img src="https://latex.codecogs.com/png.image?\dpi{110}\bg{white}$$\text{frac}=\frac{i-\text{start}&plus;1}{k&plus;1}$$" style="vertical-align: middle;" alt="Interpolación Lineal">
+  <!--
+  $$
+  \text{frac} = \frac{i - \text{start} + 1}{k + 1}.
+  $$
+  -->
+  Se define la función logística normalizada: <img src="img/log_norm.png" style="vertical-align: middle;" alt="Función Logistica Normalizada">
+  <!--
+  $$
+  S = \frac{1}{1 + e^{-k(\text{frac} - 0.5)}}, \quad
+  S_0 = \frac{1}{1 + e^{-k(0 - 0.5)}}, \quad
+  S_1 = \frac{1}{1 + e^{-k(1 - 0.5)}}
+  $$
+  -->
+  y la fracción normalizada es: <img src= "img\frac_norm.png" style="vertical-align: middle;" alt="Fracción Normalizada">
 
-  Se define la función logística normalizada:
-  ![Función_logística_normalizada](https://latex.codecogs.com/png.image?\inline&space;\dpi{110}\bg{white}$$S=\frac{1}{1&plus;e^{-k(\text{frac}-0.5)}},\quad&space;S_0=\frac{1}{1&plus;e^{-k(0-0.5)}},\quad&space;S_1=\frac{1}{1&plus;e^{-k(1-0.5)}}$$)
+  <!--
+  $$
+  \text{norm\_frac} = \frac{S - S_0}{S_1 - S_0}.
+  $$
+  -->
+  Entonces, la interpolación se realiza para el caso de interpolación de izquierda a derecha como: <img src="img\Interpolacion_sig_izq-der.png"  style="vertical-align: middle;" alt="Interpolación sig izq-der">
 
-  y la fracción normalizada es:
-  ![Fraccion normalizada](https://latex.codecogs.com/png.image?\inline&space;\dpi{110}\bg{white}$$\text{norm\_frac}=\frac{S-S_0}{S_1-S_0}$$)
-
-  Entonces, la interpolación se realiza como:
-  ![Interpolación sig izq-der](https://latex.codecogs.com/png.image?\inline&space;\dpi{110}\bg{white}$$v_i=L&plus;\text{norm\_frac}\cdot(R-L)$$)
-
-  para el caso de interpolación de izquierda a derecha, y de forma análoga para la interpolación de derecha a izquierda:
-  ![Interpolación sig der-izq](https://latex.codecogs.com/png.image?\inline&space;\dpi{110}\bg{white}$$v_i=R&plus;\text{norm\_frac}\cdot(L-R)$$)
-
+  <!--
+  $$
+  v_i = L + \text{norm\_frac} \cdot (R - L)
+  $$
+  -->
+  y de forma análoga para la interpolación de derecha a izquierda: <img src="img\Interpolacion_sig_der-izq.png"  style="vertical-align: middle;" alt="Interpolación sig der-izq">
+  <!--   
+  $$
+  v_i = R + \text{norm\_frac} \cdot (L - R).
+  $$
+  -->
 > **Nota:**  
 > - Si el bloque inicia en el primer índice (i.e. $\text{start} = 0$), la interpolación se realiza de **derecha a izquierda** (invirtiendo el orden de cálculo).  
 > - En este caso, la restricción acumulativa se aplica de forma inversa: se garantiza que cada nuevo valor no sea mayor que el valor a su derecha.
@@ -86,22 +120,43 @@ La interpolación se realiza de la siguiente manera:
 > <br>
 
 
-Para asegurar que el cambio entre valores consecutivos no supere $max\_step$, se ajusta cada valor $v_i$ de la siguiente forma:
-![Ajuste_de_valores](https://latex.codecogs.com/png.image?\inline&space;\dpi{110}\bg{white}$$v_i=\max\!\left(\min\!\left(v_i,\,v_{i-1}&plus;\text{max\_step}\right),\,v_{i-1}-\text{max\_step}\right)$$)
+Para asegurar que el cambio entre valores consecutivos no supere $max\_step$, se ajusta cada valor $v_i$ de la siguiente forma: <img src="img\Restriccion_cambio.png" style="vertical-align: middle;" alt="Restricción de Cambio">
+<!--
+$$
+v_i = \max\!\left(\min\!\left(v_i,\, v_{i-1} + \text{max\_step}\right),\, v_{i-1} - \text{max\_step}\right)
+$$
+-->
 
 Si se activa la restricción acumulativa ($cumm = \text{True}$), se garantiza que:
 
-- **Al rellenar de izquierda a derecha:**
-  ![Restricción_acumulativa_izq-der](https://latex.codecogs.com/png.image?\inline&space;\dpi{110}\bg{white}$$v_i\geq&space;v_{i-1}$$)
+- **Al rellenar de izquierda a derecha:** <img src="img\Restriccion_acumulativa_izq-der.png" style="vertical-align: middle;" alt="Restricción_acumulativa_izq-der">
+  <!--
+  $$
+  v_i \geq v_{i-1}
+  $$
+  -->
 
-- **Al rellenar de derecha a izquierda:**
-  ![Restricción_acumulativa_der-izq](https://latex.codecogs.com/png.image?\inline&space;\dpi{110}\bg{white}$$v_i\leq&space;v_{i&plus;1}$$)
+- **Al rellenar de derecha a izquierda:** <img src="img\Restriccion_acumulativa_der-izq.png"  style="vertical-align: middle;" alt="Restricción_acumulativa_der-izq">
 
-Además, se añade ruido aleatorio:
-![Ruido_aleatorio](https://latex.codecogs.com/png.image?\inline&space;\dpi{110}\bg{white}$$v_i=v_i&plus;\text{random.uniform}(-\text{noise},\,\text{noise})$$)
+  <!--
+  $$
+  v_i \leq v_{i+1}
+  $$
+  -->
 
-Finalmente, se combina con la información de otras columnas mediante:
-![Combinación_con_otras_columnas](https://latex.codecogs.com/png.image?\inline&space;\dpi{110}\bg{white}$$v_{i,\text{final}}=(1-\text{other\_weight})\cdot&space;v_i&plus;\text{other\_weight}\cdot&space;v_{i,\text{other}}$$)
+Además, se añade ruido aleatorio: <img src="img\Ruido.png"  style="vertical-align: middle;"  alt="Ruido">
+<!--
+$$
+v_i = v_i + \text{random.uniform}(-\text{noise},\, \text{noise})
+$$
+-->
+
+Finalmente, se combina con la información de otras columnas mediante: <img src="img\Combinacion_columnas_interp.png"  style="vertical-align: middle;" alt="Combinación con Otras Columnas">
+<!--
+$$
+v_{i,\text{final}} = (1 - \text{other\_weight}) \cdot v_i + \text{other\_weight} \cdot v_{i,\text{other}}
+$$
+-->
 
 donde $v_{i,\text{other}}$ es la media de los valores de las columnas seleccionadas para esa fila (ignorando $NaN$).
 
@@ -203,7 +258,7 @@ test_interpolate(df)
 ```
 ### Ejemplo de Interpolación
 
-![Ejemplo de Interpolación](./interpolation_example.png)
+![Ejemplo de Interpolación](img/interpolation_example.png)
 La siguiente imagen muestra un gráfico de la interpolación aplicada a los datos de prueba:
 
 ### 📌 Explicación de la Gráfica

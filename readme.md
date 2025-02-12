@@ -120,7 +120,7 @@ La interpolación se realiza de la siguiente manera:
 > <br>
 
 
-Para asegurar que el cambio entre valores consecutivos no supere $max\_step$, 
+Para asegurar que el cambio entre valores consecutivos no supere $max\\_step$, <br>
 se ajusta cada valor $v_i$ de la siguiente forma: <img src="img\Restriccion_cambio.png" style="vertical-align: middle;" alt="Restricción de Cambio">
 <!--
 $$

@@ -13,29 +13,29 @@ Las reglas principales son:
    - **Normal:** Se interpola de **izquierda a derecha**.  
    - **Excepción:** Si el bloque de `NaN` inicia en el **primer valor**, se interpola de **derecha a izquierda**.
 
-2. **Valores Límite ($min\_value$ y $max\_value$)**  
-   - En el **extremo izquierdo**, se usa $min\_value$ como límite inferior.  
-   - En el **extremo derecho**, se usa $max\_value$ como límite superior.
+2. **Valores Límite ($min\\_value$ y $max\\_value$)**  
+   - En el **extremo izquierdo**, se usa $min\\_value$ como límite inferior.  
+   - En el **extremo derecho**, se usa $max\\_value$ como límite superior.
 
-3. **Restricción de Cambio ($max\_step$)**  
+3. **Restricción de Cambio ($max\\_step$)**  
    - El incremento o decremento entre valores consecutivos (tanto interpolados como ya existentes) no puede superar $max\_step$.  
    - Esto garantiza una transición suave entre los valores conocidos y los interpolados.
 
 4. **Ruido ($noise$)**  
    - A cada valor interpolado se le añade un ruido aleatorio uniforme en el intervalo $[-noise, +noise]$.
 
-5. **Modo de Interpolación ($fill\_mode$)**  
+5. **Modo de Interpolación ($fill\\_mode$)**  
    - Permite seleccionar el método de interpolación:
      - **`linear`:** Interpolación lineal.
      - **`exponential`:** Interpolación exponencial.
      - **`sigmoidal`:** Interpolación sigmoidal. Se utiliza una función logística normalizada para controlar la progresión, donde la pendiente se regula con una constante $k$ (fijada a 10 en la implementación).
 
 6. **Restricción Acumulativa ($cumm$)**  
-   - Si se activa ($cumm = \text{True}$), se impone que:
+   - Si se activa ($cumm = \\text{True}$), se impone que:
      - **Al rellenar de izquierda a derecha:** Cada nuevo valor no será inferior al anterior (serie no decreciente).
      - **Al rellenar de derecha a izquierda:** Cada nuevo valor no será mayor que el valor a su derecha (serie no creciente en sentido inverso).
 
-7. **Combinación con Otras Columnas ($other\_weight$)**  
+7. **Combinación con Otras Columnas ($other\\_weight$)**  
    - Se calcula la media de las columnas adicionales (ignorando $NaN$) para cada fila en la que se interpola.  
    - El valor final se obtiene combinando el valor interpolado y la media de las otras columnas según la fórmula:
 
@@ -120,7 +120,8 @@ La interpolación se realiza de la siguiente manera:
 > <br>
 
 
-Para asegurar que el cambio entre valores consecutivos no supere $max\_step$, se ajusta cada valor $v_i$ de la siguiente forma: <img src="img\Restriccion_cambio.png" style="vertical-align: middle;" alt="Restricción de Cambio">
+Para asegurar que el cambio entre valores consecutivos no supere $max\\_step$, <br>
+se ajusta cada valor $v_i$ de la siguiente forma: <img src="img\Restriccion_cambio.png" style="vertical-align: middle;" alt="Restricción de Cambio">
 <!--
 $$
 v_i = \max\!\left(\min\!\left(v_i,\, v_{i-1} + \text{max\_step}\right),\, v_{i-1} - \text{max\_step}\right)

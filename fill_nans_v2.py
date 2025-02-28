@@ -9,16 +9,16 @@ def interpolate_with_rules(
     min_value: float,
     max_value: float,
     noise: float,
-    max_step: float,
+    max_step: float,  # Puede ser None
     other_weight: float,
     seed: int = 42,
     other_columns: list[str] = None,
-    fill_mode: str = "linear",  # Puede ser "linear", "exponential" o "sigmoidal"
+    fill_mode: str = "linear",  # Puede ser "linear", "exponential", "sigmoidal" o "irracional"
     cumm: bool = False  # Si True, se impone la restricción acumulativa.
 ) -> pd.DataFrame:
     """
     Interpola los valores NaN en la columna 'target_column' de un DataFrame, combinando la interpolación
-    (lineal, exponencial o sigmoidal) con información derivada de otras columnas.
+    (lineal, exponencial, sigmoidal o irracional) con información derivada de otras columnas.
     
     Para cada bloque consecutivo de NaN en 'target_column', se realiza:
       1) Se identifica el límite izquierdo (L) y el límite derecho (R). Si no hay valor anterior se usa min_value;
@@ -27,45 +27,17 @@ def interpolate_with_rules(
              - "linear": interpolación lineal.
              - "exponential": interpolación exponencial.
              - "sigmoidal": interpolación sigmoidal.
+             - "irracional": interpolación que sube rápido al principio y después crece menos (utiliza la raíz cuadrada).
          (Para bloques que inician en el índice 0, se interpola de derecha a izquierda).
       3) A cada valor interpolado se le añade un ruido uniforme en el rango [-noise, noise].
       4) Se obtiene un "valor de otras columnas" para la misma fila, calculado como la media de los valores
          de las columnas indicadas (ignorando NaN). Si no se proporcionan o no hay datos válidos, se usa el valor base.
       5) Se combina el valor interpolado con el obtenido de las otras columnas usando:
              valor_final = (1 - other_weight) * valor_interpolado + other_weight * valor_otras
-      6) Se fuerza que el valor resultante esté entre [min_value, max_value] y que la diferencia
+      6) Se fuerza que el valor resultante esté entre [min_value, max_value] y que, si max_step no es None, la diferencia
          con el valor anterior (o siguiente) no exceda max_step. Además, si 'cumm' es True se impone que:
             - En el caso de rellenar de izquierda a derecha, el nuevo valor no sea inferior al anterior.
             - En el caso de rellenar de derecha a izquierda, el nuevo valor no sea mayor que el valor a su derecha.
-
-    Parámetros
-    ----------
-    df : pd.DataFrame
-        DataFrame que contiene la columna objetivo y las demás columnas que se usarán para complementar la interpolación.
-    target_column : str
-        Nombre de la columna objetivo que se interpolará.
-    min_value : float
-        Valor mínimo permitido (y usado en la frontera izquierda si es necesario).
-    max_value : float
-        Valor máximo permitido (y usado en la frontera derecha si es necesario).
-    noise : float
-        Magnitud del ruido (uniforme en [-noise, noise]) a añadir a cada valor interpolado.
-    max_step : float
-        Diferencia máxima permitida entre un valor interpolado y el anterior (o siguiente) ya conocido.
-    other_weight : float
-        Peso (en el rango [0, 1]) de la influencia de la información proveniente de las otras columnas.
-    seed : int, opcional
-        Semilla para el generador de números aleatorios.
-    other_columns : list[str], opcional
-        Lista de columnas a utilizar para complementar la interpolación. Si es None, se usan todas las columnas
-        excepto la columna objetivo.
-    fill_mode : str, opcional
-        Modo de interpolación: "linear", "exponential" o "sigmoidal".
-    cumm : bool, opcional
-        Si es True, se impone que:
-         - En el modo de rellenar de izquierda a derecha, cada nuevo valor no sea inferior al anterior.
-         - En el modo de rellenar de derecha a izquierda, cada nuevo valor no sea mayor que el valor a su derecha.
-         Si es False, no se aplica esta restricción.
 
     Retorna
     -------
@@ -87,39 +59,40 @@ def interpolate_with_rules(
     def clamp_and_step(value, previous_value, reverse=False):
         """
         Ajusta 'value' para que:
-          - La diferencia con 'previous_value' no exceda 'max_step' (en función del sentido de iteración).
+          - Si max_step no es None, la diferencia con 'previous_value' no exceda max_step (en función del sentido de iteración).
           - Si 'cumm' es True, se impone que:
                * En modo normal (reverse=False): 'value' no sea inferior a 'previous_value'.
                * En modo inverso (reverse=True): 'value' no sea mayor que 'previous_value'.
           - Se mantenga dentro del rango [min_value, max_value].
         """
-        if reverse:
-            # Relleno de derecha a izquierda.
-            diff = previous_value - value  # Se desea que value sea como máximo igual a previous_value.
-            if cumm:
-                if diff < 0:  # value > previous_value.
-                    value = previous_value
-                elif diff > max_step:
-                    value = previous_value - max_step
+        if max_step is not None:
+            if reverse:
+                # Relleno de derecha a izquierda.
+                diff = previous_value - value  # Se desea que value sea como máximo igual a previous_value.
+                if cumm:
+                    if diff < 0:  # value > previous_value.
+                        value = previous_value
+                    elif diff > max_step:
+                        value = previous_value - max_step
+                else:
+                    if diff > max_step:
+                        value = previous_value - max_step
+                    elif diff < -max_step:
+                        value = previous_value + max_step
             else:
-                if diff > max_step:
-                    value = previous_value - max_step
-                elif diff < -max_step:
-                    value = previous_value + max_step
-        else:
-            # Relleno de izquierda a derecha.
-            diff = value - previous_value
-            if cumm:
-                if diff < 0:
-                    value = previous_value
-                elif diff > max_step:
-                    value = previous_value + max_step
-            else:
-                if diff > max_step:
-                    value = previous_value + max_step
-                elif diff < -max_step:
-                    value = previous_value - max_step
-        
+                # Relleno de izquierda a derecha.
+                diff = value - previous_value
+                if cumm:
+                    if diff < 0:
+                        value = previous_value
+                    elif diff > max_step:
+                        value = previous_value + max_step
+                else:
+                    if diff > max_step:
+                        value = previous_value + max_step
+                    elif diff < -max_step:
+                        value = previous_value - max_step
+        # Clampea el valor en el rango [min_value, max_value]
         if value < min_value:
             value = min_value
         elif value > max_value:
@@ -131,8 +104,7 @@ def interpolate_with_rules(
         Calcula el valor base interpolado entre L y R dado una fracción 'frac' y el modo de interpolación.
         Si reverse es True, se interpola de derecha a izquierda.
         """
-        # Para el modo sigmoidal se utiliza una función logística normalizada.
-        # Usamos una constante k que controla la pendiente (se ha elegido k=10).
+        # Constante para la función sigmoidal
         k = 10
         if reverse:
             diff = L - R
@@ -146,6 +118,8 @@ def interpolate_with_rules(
                 S1 = 1 / (1 + np.exp(-k * (1 - 0.5)))
                 norm_frac = (S - S0) / (S1 - S0)
                 return R + diff * norm_frac
+            elif mode == "irracional":
+                return R + diff * np.sqrt(frac)
             else:
                 raise ValueError(f"fill_mode '{mode}' no soportado.")
         else:
@@ -160,6 +134,8 @@ def interpolate_with_rules(
                 S1 = 1 / (1 + np.exp(-k * (1 - 0.5)))
                 norm_frac = (S - S0) / (S1 - S0)
                 return L + diff * norm_frac
+            elif mode == "irracional":
+                return L + diff * np.sqrt(frac)
             else:
                 raise ValueError(f"fill_mode '{mode}' no soportado.")
     
@@ -234,6 +210,7 @@ def interpolate_with_rules(
     df_new[target_column] = arr
     return df_new
 
+
 def test_interpolation(data = None, target_column = "target", min_value = 0, max_value = 1, noise = 0, 
                        max_step = 0.2, other_weight = 0.5, other_columns = None, seed = 42,
                        fill_mode="linear", cumm=False):
@@ -250,105 +227,18 @@ def test_interpolation(data = None, target_column = "target", min_value = 0, max
         }
         data = pd.DataFrame(data)
     
-    # Interpolación sin influencia de otras columnas (other_weight = 0)
-    df_no_other = interpolate_with_rules(
+    # Ejemplo: Interpolación utilizando el modo "irracional"
+    df_irracional = interpolate_with_rules(
         data,
         target_column=target_column,
         min_value=min_value,
         max_value=max_value,
         noise=noise,
         max_step=max_step,
-        other_weight=other_weight,  # Sin influencia de otras columnas
+        other_weight=other_weight,
         seed=seed,
-        fill_mode=fill_mode,
+        fill_mode="irracional",
         cumm=cumm
-    )
-    
-    other_weight_2 = 0.5
-    # Interpolación con influencia de todas las columnas (excepto target)
-    df_with_other = interpolate_with_rules(
-        data,
-        target_column=target_column,
-        min_value=min_value,
-        max_value=max_value,
-        noise=noise,
-        max_step=max_step,
-        other_weight=other_weight_2,
-        seed=seed,
-        fill_mode=fill_mode,
-        cumm=cumm
-    )
-    
-    # Interpolación utilizando solo la columna "other1"
-    df_with_other_col_1 = interpolate_with_rules(
-        data,
-        target_column=target_column,
-        min_value=min_value,
-        max_value=max_value,
-        noise=noise,
-        max_step=max_step,
-        other_weight=other_weight,
-        seed=seed,
-        other_columns=[data.columns[1]],
-        fill_mode=fill_mode,
-        cumm=cumm
-    )
-    
-    # Interpolación utilizando solo la columna "other2"
-    df_with_other_col_2 = interpolate_with_rules(
-        data,
-        target_column=target_column,
-        min_value=min_value,
-        max_value=max_value,
-        noise=noise,
-        max_step=max_step,
-        other_weight=other_weight,
-        seed=seed,
-        other_columns=[data.columns[2]],
-        fill_mode=fill_mode,
-        cumm=cumm
-    )
-    
-    # Interpolación con restricción acumulativa
-    df_cumm = interpolate_with_rules(
-        data,
-        target_column=target_column,
-        min_value=min_value,
-        max_value=max_value,
-        noise=noise,
-        max_step=max_step,
-        other_weight=other_weight,
-        seed=seed,
-        fill_mode=fill_mode,
-        cumm=True
-    )
-    
-    # Interpolación exponencial con restricción acumulativa activada
-    df_exp = interpolate_with_rules(
-        data,
-        target_column=target_column,
-        min_value=min_value,
-        max_value=max_value,
-        noise=noise,
-        max_step=max_step,
-        other_weight=other_weight,
-        seed=seed,
-        fill_mode="exponential",
-        cumm=True
-    )
-    
-    # Interpolación sigmoidal con restricción acumulativa activada
-    df_sigmoidal = interpolate_with_rules(
-        data,
-        target_column=target_column,
-        min_value=min_value,
-        max_value=max_value,
-        noise=noise,
-        max_step=max_step,
-        other_weight=other_weight,
-        seed=seed,
-        fill_mode="sigmoidal",
-        cumm=True
     )
     
     # Graficamos los resultados
@@ -359,21 +249,9 @@ def test_interpolation(data = None, target_column = "target", min_value = 0, max
     for col in data.columns[1:]:
         fig.add_scatter(x=data.index, y=data[col], mode='lines+markers', name=col)
     
-    # Añadimos las líneas de las interpolaciones
-    fig.add_scatter(x=df_no_other.index, y=df_no_other[target_column], mode='lines+markers',
-                    name='Sin influencia de otras columnas')
-    fig.add_scatter(x=df_with_other.index, y=df_with_other[target_column], mode='lines+markers',
-                    name=f'Con influencia de otras columnas (α={other_weight_2})')
-    fig.add_scatter(x=df_with_other_col_1.index, y=df_with_other_col_1[target_column], mode='lines+markers',
-                    name=f'Con influencia de {[data.columns[1]]} (α={other_weight})')
-    fig.add_scatter(x=df_with_other_col_2.index, y=df_with_other_col_2[target_column], mode='lines+markers',
-                    name=f'Con influencia de {[data.columns[2]]} (α={other_weight})')
-    fig.add_scatter(x=df_cumm.index, y=df_cumm[target_column], mode='lines+markers',
-                    name='Con restricción acumulativa')
-    fig.add_scatter(x=df_exp.index, y=df_exp[target_column], mode='lines+markers',
-                    name='Interpolación exponencial (con restricción acumulativa)')
-    fig.add_scatter(x=df_sigmoidal.index, y=df_sigmoidal[target_column], mode='lines+markers',
-                    name='Interpolación sigmoidal (con restricción acumulativa)')
+    # Añadimos la línea de la interpolación irracional
+    fig.add_scatter(x=df_irracional.index, y=df_irracional[target_column], mode='lines+markers',
+                    name='Interpolación irracional')
     
     # Mostramos la gráfica
     fig.show()
@@ -383,8 +261,8 @@ def test_interpolation(data = None, target_column = "target", min_value = 0, max
 if __name__ == "__main__":
     # Creamos un DataFrame de ejemplo
     data = {
-        "target": [0.0, 0.05, 0.1, np.nan, np.nan, np.nan, np.nan, np.nan, 0.4, 0.5,
-                   0.52, 0.5, np.nan, np.nan, 0.7, 0.71, 0.73, np.nan, np.nan, np.nan, np.nan, np.nan],
+        "target": [0.0, 0.05, 0.1, np.nan, np.nan, np.nan, np.nan, np.nan, 0.4, np.nan,
+                   0.5, np.nan, np.nan, np.nan, 0.7, 0.75, 0.8, np.nan, np.nan, np.nan, np.nan, np.nan],
         "other1": [0.1, 0.1, 0.1, 0.11, 0.2, 0.22, 0.22, 0.25, 0.28, 0.3,
                    0.33, 0.37, 0.4, 0.45, 0.5, 0.55, 0.55, 0.65, 0.66, 0.7, 0.75, 0.75],
         "other2": [0.0, 0.08, 0.16, 0.24, 0.32, 0.4, 0.48, 0.56, 0.64, 0.72,
@@ -398,13 +276,12 @@ if __name__ == "__main__":
     max_value = 1
     noise = 0       
     max_step = 0.2
-    other_weight = 0.2
+    other_weight = 0.1
     other_columns = None
     seed = 42
-    fill_mode="linear"  # También puede ser "exponential" o "sigmoidal"
-    cumm=False
+    fill_mode = "irracional"  # También puede ser "linear", "exponential" o "sigmoidal"
+    cumm = False
     #########################
-    
     df_no_other = interpolate_with_rules(
         data,
         target_column=target_column,
@@ -498,7 +375,21 @@ if __name__ == "__main__":
         fill_mode="sigmoidal",
         cumm=True
     )
+
+    df_irracional = interpolate_with_rules(
+        data,
+        target_column=target_column,
+        min_value=min_value,
+        max_value=max_value,
+        noise=noise,
+        max_step=max_step,
+        other_weight=other_weight,
+        seed=seed,
+        fill_mode=fill_mode,
+        cumm=cumm
+    )
     
+    # Graficamos los resultados
     fig = px.line(data["target"], markers=True, title="Interpolación de valores NaN", height=800)
     fig.update_traces(marker=dict(symbol='x', size=20), line=dict(width=8))
     
@@ -519,7 +410,9 @@ if __name__ == "__main__":
                     name='Interpolación exponencial (con restricción acumulativa)')
     fig.add_scatter(x=df_sigmoidal.index, y=df_sigmoidal["target"], mode='lines+markers',
                     name='Interpolación sigmoidal (con restricción acumulativa)')
+    fig.add_scatter(x=df_irracional.index, y=df_irracional["target"], mode='lines+markers',
+                    name='Interpolación irracional')
     
     fig.show()
 
-__all__ = ["interpolate_with_rules_v4", "test_interpolation"]
+__all__ = ["interpolate_with_rules", "test_interpolation"]
